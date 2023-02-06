@@ -8,9 +8,9 @@
 % (1) imstor: stores each image frames of loaded video
 % (2) cntrd_cell: stores cluster coordinates & centroid of clusters per frame
 % (3) ident_cell: stores cluster membership in each adjacent time-points
-% (4) seed_cell: stores each clusters across different impoints
+% (4) seed_cell: stores each clusters across dif\ferent impoints
 %% Variable Set 
-vid_tit='732b9_latPre.mp4'; % 
+vid_tit='f5150_latPre.mp4'; % 
 filt_Y=1; % Apply gaussan filter
 gaus_filt=2; % Degree of filter (this smoothes frame image)
 thr_diff=0.85; % Threshold for diff image 
@@ -116,7 +116,7 @@ for i=1:size(cntrd_cell,1)-1 %% CHANGE MADE 01/03/2022
         vec=val_1{ii};
         temp_1=zeros(size(K));
         temp_1(vec(:,1),vec(:,2))=1;
-        %
+        %ii=
         val_2=cntrd_cell{i+1,2};
         %
         r_vec=[];
@@ -150,7 +150,7 @@ for i=1:size(cntrd_cell,1)-1 %% CHANGE MADE 01/03/2022
         % Case 1: When one cluster at t=0 divides into 2 (or more) at t=1
         % Forces one cluster to produce one cluster (no multiple cluster) 
         if length(find(ident_vec==1))>1 % [1,1] repeat
-            idxi_r=find(r_vec==max(r_max));
+            idxi_r=min(find(r_vec==max(r_max)));
             ident_vec(ident_vec~=idxi_r)=0;            
         end 
         

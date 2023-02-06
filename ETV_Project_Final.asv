@@ -8,9 +8,9 @@
 % (1) imstor: stores each image frames of loaded video
 % (2) cntrd_cell: stores cluster coordinates & centroid of clusters per frame
 % (3) ident_cell: stores cluster membership in each adjacent time-points
-% (4) seed_cell: stores each clusters across different impoints
+% (4) seed_cell: stores each clusters across dif\ferent impoints
 %% Variable Set 
-vid_tit='2f879_iiiPre.mp4'; % 
+vid_tit='ab53_iiiPost.mp4'; % 
 filt_Y=1; % Apply gaussan filter
 gaus_filt=2; % Degree of filter (this smoothes frame image)
 thr_diff=0.85; % Threshold for diff image 
@@ -100,7 +100,7 @@ for i=2:numFrames  %length(vali)
     disp("Processed "+string(i)+" out of "+string(numFrames)+" Frames.");
     toc
 end 
-clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr vid pix2mm
+clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr vid pix2mm vid_tit
 %% Step 6: Time-Variant Cluster Membership Confirmation
 %% N.B!!: index (ii) of ident_col is from cluster membership from ii <-- ii-1
 % E.g: cluster membership of 3 of indent_col is from timepoint 2 -->
@@ -181,9 +181,13 @@ clear ident_cell ident_vec;
 %%
 seed_cell=cell(1,2);
 cnt=1;
-for i=2:length(ident_col)
-    if ~isempty(ident_col{i,1}) || sum(cell2mat(ident_col{i,1}))~=0  %% skip over empty frames
+for i=2:length(ident_col)-1
+    if sum(cell2mat(ident_col{i,1}))~=0  %% skip over empty frames
         seed=ident_col{i,1};
+        if sum(cell2mat(seed))>1 
+            seed={seed{1,1}}; % If two simultaneous clusters, just choose first one
+        end 
+        %
         if sum(cell2mat(seed))==1 && sum(cell2mat(ident_col{i-1,1}))==0 %finding cluster & previous one is zero
             t_col=[];
             seed_col=[]; %% open new seed_col
@@ -209,30 +213,29 @@ for i=2:length(ident_col)
 end 
 %% Calculating Velocity Intra-Cluster
 dt=round(1./vid.FrameRate,4); %sec
-for i=length(seed_cell)
+v_col=[];
+for i=1:length(seed_cell)
     clust=seed_cell{i,1};
     for j=2:length(clust)
         d_pix = norm(clust(j,:)-clust(j-1,:));
         d_mm=d_pix*pix2mm;
-        v_mm=
+        v_mm=d_mm./dt; %mm/sec
+        v_col=[v_col;v_mm];
     end 
-        
- 
 end 
-
-
-
-
 %% Plotting & Saving Variables
 tit=erase(vid_tit,'.mp4'); 
 ETV.title=tit; %saving title
-ETV.imstor=imstor; %saving each frame
 ETV.cntrd_cell=cntrd_cell; %saving each frame
 ETV.seed_cell=seed_cell;
+ETV.dt=dt; 
+ETV.velocity=v_col;
+ETV.vid_height=vid.Height;
+ETV.vid_width=vid.Width;
 save(tit+".mat",'ETV');
+clear all
 
-
-dt=round(1./vid.FrameRate,4);
+%{
 for i=1:length(seed_cell)
 RGB=[rand,rand,rand];
 vec=seed_cell{i,1};
@@ -253,7 +256,7 @@ for jjj=1:length(X)
 end
 hold off
 end 
-%}
+
 %clear all
 
 
@@ -266,5 +269,6 @@ ts=seed_cell{9,2};
  pause(0.5);
  end
 
+ %}
  
 
