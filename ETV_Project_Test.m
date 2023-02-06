@@ -31,7 +31,7 @@ imstor=cell(1,n);
  end 
  imstor{1,i}=K;         %each element of imstor is frames of the video
  end
-disp("Video frame loading complete. There are total"+string(n)+" frames to process")
+disp("Video frame loading complete. There are total "+string(n)+" frames to process")
 %% Step 1: Temporal Difference Map 
 cntrd_cell=cell(numFrames,2);
 vali=1:numFrames;
@@ -98,7 +98,7 @@ for i=2:numFrames  %length(vali)
     disp("Processed "+string(i)+" out of "+string(numFrames)+" Frames.");
     toc
 end 
-clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr
+clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr vid
 %% Step 6: Time-Variant Cluster Membership Confirmation
 %% N.B!!: index (ii) of ident_col is from cluster membership from ii <-- ii-1
 % E.g: cluster membership of 3 of indent_col is from timepoint 2 -->
@@ -177,151 +177,39 @@ clear ident_cell ident_vec;
 % of clusters in cntrd_cell{i}
 %% Step 7: Cluster Membership Streamline: Follow the One!
 %%
-updt_col=cell(size(ident_col,1),1);
-for i=2:size(ident_col,1)
-    clust_mem=ident_col{i,1};
-    %% CASE 1: when idx=i-1 (previous) has 1 cluster
-    if size(clust_mem,1)==1 
-        old_coor=cntrd_cell{i-1,1}; %idx=i-1 (previous) cluster centroid
-        updt_coors=cell(1,1);
-        post_clust=clust_mem{1,1};
-        if length(post_clust)==1 %% 1 --> 1 mapping
-            post_clust_idxi=find(post_clust==1);
-            cndtes=cntrd_cell{i,1};
-            new_coor=cndtes(post_clust_idxi,:);
-        elseif length(post_clust)>1 %1 --> many mapping 
-            post_clust_idxi=find(post_clust==1); %idxi=i (post) cluster centroid
-            cndtes=cntrd_cell{i,1};
-            new_coor=cndtes(post_clust_idxi,:);
-        end  
-        updt_coors{1,1}=[old_coor;new_coor];
-        updt_col{i,1}=updt_coors;
-    %% CASE 2:  %when idx=i-1 (previous) has more than cluster i=8
-    elseif size(clust_mem,1)>1 
-        old_coors=cntrd_cell{i-1,1}; %idx=i-1 (previous) cluster centroid
-        updt_coors=cell(size(clust_mem,1),1);
-        for jj=1:size(clust_mem,1) 
-            old_coor=old_coors(jj,:);
-            post_clust=clust_mem{jj,1};
-            post_clust_idxi=find(post_clust==1); %idxi=i (post) cluster centroid
-            cndtes=cntrd_cell{i,1};
-            new_coor=cndtes(post_clust_idxi,:);
-            updt_coors{jj,1}=[old_coor;new_coor];
-        end 
-        updt_col{i,1}=updt_coors;
-    end 
-    
-    %updt_col{i,1}=updt_coors;
-end 
-%% 
-exst=[];
-empt=[];
-for i=1:size(updt_col,1)
-    if isempty(updt_col{i,1})
-        empt=[empt;i];
-    else
-        exst=[exst;i];
-    end 
-end 
-diffi=diff(empt);
-diffi_2=diff(exst);
-brdn=empt(find(diffi>1)); %brdn
-brdn=[1;brdn];
-brdn_exst=exst(find(diffi_2>1));
-brdn_exst=brdn_exst+ones(size(brdn_exst));
-empt_vec=sort([brdn;brdn_exst]);
-if rem(length(empt_vec), 2)~=0
-    empt_vec(end)=[];
-end 
-empt_vec = reshape(empt_vec,2,[])';
-
-
-for i=1:size(empt_vec,1)
-    idxi=empt_vec(i,1):empt_vec(i,2);
-    for jj=idxi
-        updt_col{jj,1}=updt_col{empt_vec(i,2)+1,1};
-    end 
-end 
-
-%% Cluster Mapping & Timepoint Extraction
-    ini_coor=updt_col{2,1}{1,1}; %2nd element;
-    cnt=1; %counter cluster
-    seed_epoch=cell(1,3); %cluster inventory: 1st clmn: seed, 2nd clmn: cntrd of clusters, 3rd clm: time 
-    if size(ini_coor,1)
-        seed_epoch{cnt,1}=ini_coor(1,:);
-    else 
-        seed_epoch{cnt,1}=ini_coor(2,:); %first seed
-    end 
-    seed_epoch{cnt,2}=ini_coor; %[updt]; %first cluster initialization
-    seed_epoch{cnt,3}=[1;2];
-    %updt=seed_epoch{cnt,1}; %first seed initialization
-    
-    
-    for jj=3:size(updt_col,1)
-        updts=updt_col{jj,1}; %fist updts 
-        if ~isequal(updts,updt_col{jj-1,1})
-            for hh=1:size(updts,1)
-                candi=updts{hh,1}; %first updts confirming
-                if size(candi,1)==2 
-                    %% Removing Repeats
-                    updt_cols=[];
-                    for kk=1:cnt
-                        updt_cols=[updt_cols;seed_epoch{kk,1}];
-                    end 
-                %% 
-                    for kk=1:cnt
-                        updt=seed_epoch{kk,1};  
-                    %% Case 1: Branching of Continuing Connection
-                        if isequal(candi(1,:),updt) %estalishing last link (pre) to new link (post)
-                            clust_cnt=seed_epoch{kk,2}; %loading exising cluster
-                            clust_cnt=[clust_cnt;candi(2,:)]; %updated cluster cntrd
-                            updt=candi(2,:); %update seed 
-                            t_1=seed_epoch{kk,3};
-                            t_1=[t_1;jj];
-                        
-                            seed_epoch{kk,1}=updt; 
-                            seed_epoch{kk,2}=clust_cnt;
-                            seed_epoch{kk,3}=t_1;
-                       %% Case 2: Starting New Connection
-                        %elseif ~isequal(candi(1,:),updt) %new connection
-                        elseif ~ismember(candi(1,:),updt_cols)==ones(1,2) % ~isequal(candi(1,:),updt) %new connection
-                            new_clust_cnt=[];
-                            new_clust_cnt=[new_clust_cnt;candi]; %updated cluster cntrd
-                            cnt=cnt+1; %Updating cnt (forming new branch)
-                            seed_epoch{cnt,1}=candi(2,:); %updated seed
-                            seed_epoch{cnt,2}=new_clust_cnt; %updated seed
-                            seed_epoch{cnt,3}=[jj-1;jj];
-                        end 
-                        
-                        if cnt>=2 %Removing repeats
-                            if isequal(seed_epoch{cnt,1},seed_epoch{cnt-1,1}) && isequal(seed_epoch{cnt,2},seed_epoch{cnt-1,2})
-                                cnt=cnt-1;
-                            end 
-                        end 
- 
-                    end 
-                end 
+seed_cell=cell(1,2);
+cnt=1;
+for i=2:length(ident_col)
+    if ~isempty(ident_col{i,1}) || sum(cell2mat(ident_col{i,1}))~=0  %% skip over empty frames
+        seed=ident_col{i,1};
+        if sum(cell2mat(seed))==1 && sum(cell2mat(ident_col{i-1,1}))==0 %finding cluster & previous one is zero
+            t_col=[];
+            seed_col=[]; %% open new seed_col
+            [seed_col]=[seed_col;clust_connect(seed,i,cntrd_cell)];
+            t_col=[t_col;i-1;i];
+        elseif sum(cell2mat(seed))==1 && sum(cell2mat(ident_col{i-1,1}))==1 %finding cluster & previous one also cluster
+            if sum(cell2mat(ident_col{i+1,1}))==1 || ~isempty(ident_col{i+1,1})
+                [seed_col]=[seed_col;clust_connect(seed,i,cntrd_cell)];
+                 t_col=[t_col;i-1;i];
+            elseif sum(cell2mat(ident_col{i+1,1}))==0 || isempty(ident_col{i+1,1})
+                [seed_col]=[seed_col;clust_connect(seed,i,cntrd_cell)];
+                 t_col=[t_col;i-1;i];
+                % Post Processing: Deleting Repeats 
+                [~,ia,~] = unique(t_col);
+                seed_cell{cnt,1}=seed_col(ia,:);
+                seed_cell{cnt,2}=t_col(ia);
+                %
+                cnt=cnt+1;
             end
         end
-        jj
-    end 
-%% Plotting & Saving Variables
-sv_tit=erase(vid_tit,".mp4");
-
-% Removing clusters with membership < 3
-rmv=[];
-for i=1:size(seed_epoch,1)
-    if size(seed_epoch{i,2},1)<3
-        rmv=[rmv;i];
-    end 
+        %%
+    end         
 end 
-seed_epoch(rmv,:)=[];
-save(sv_tit,"seed_epoch");
+%% Plotting & Saving Variables
 
-%{
-for i=1:40; %size(seed_epoch,1)
+for i=1:length(seed_cell)
 RGB=[rand,rand,rand];
-vec=seed_epoch{i,2};
+vec=seed_cell{i,1};
 Y=vec(:,1);
 X=vec(:,2);
 Y=vid.Height-Y;
