@@ -10,7 +10,7 @@
 % (3) ident_cell: stores cluster membership in each adjacent time-points
 % (4) seed_cell: stores each clusters across different impoints
 %% Variable Set 
-vid_tit='732b9_iiiPre.mp4'; % 
+vid_tit='732b9_latPre.mp4'; % 
 filt_Y=1; % Apply gaussan filter
 gaus_filt=2; % Degree of filter (this smoothes frame image)
 thr_diff=0.85; % Threshold for diff image 
@@ -181,7 +181,7 @@ clear ident_cell ident_vec;
 %%
 seed_cell=cell(1,2);
 cnt=1;
-for i=2:length(ident_col)
+for i=2:length(ident_col)-1
     if sum(cell2mat(ident_col{i,1}))~=0  %% skip over empty frames
         seed=ident_col{i,1};
         if sum(cell2mat(seed))>1 
