@@ -10,7 +10,7 @@
 % (3) ident_cell: stores cluster membership in each adjacent time-points
 % (4) seed_cell: stores each clusters across different impoints
 %% Variable Set 
-vid_tit='732b9_iiiPost.mp4'; % 
+vid_tit='2f879_iiiPre.mp4'; % 
 filt_Y=1; % Apply gaussan filter
 gaus_filt=2; % Degree of filter (this smoothes frame image)
 thr_diff=0.85; % Threshold for diff image 
@@ -100,7 +100,7 @@ for i=2:numFrames  %length(vali)
     disp("Processed "+string(i)+" out of "+string(numFrames)+" Frames.");
     toc
 end 
-clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr vid pix2mm vid_tit
+clearvars -except cntrd_cell imstor numFrames clust_size K vid_tit auto_lag_thr auto_corr vid pix2mm
 %% Step 6: Time-Variant Cluster Membership Confirmation
 %% N.B!!: index (ii) of ident_col is from cluster membership from ii <-- ii-1
 % E.g: cluster membership of 3 of indent_col is from timepoint 2 -->
@@ -209,29 +209,30 @@ for i=2:length(ident_col)
 end 
 %% Calculating Velocity Intra-Cluster
 dt=round(1./vid.FrameRate,4); %sec
-v_col=[];
-for i=1:length(seed_cell)
+for i=length(seed_cell)
     clust=seed_cell{i,1};
     for j=2:length(clust)
         d_pix = norm(clust(j,:)-clust(j-1,:));
         d_mm=d_pix*pix2mm;
-        v_mm=d_mm./dt; %mm/sec
-        v_col=[v_col;v_mm];
+        v_mm=
     end 
+        
+ 
 end 
+
+
+
+
 %% Plotting & Saving Variables
 tit=erase(vid_tit,'.mp4'); 
 ETV.title=tit; %saving title
+ETV.imstor=imstor; %saving each frame
 ETV.cntrd_cell=cntrd_cell; %saving each frame
 ETV.seed_cell=seed_cell;
-ETV.dt=dt; 
-ETV.velocity=v_col;
-ETV.vid_height=vid.Height;
-ETV.vid_width=vid.Width;
 save(tit+".mat",'ETV');
-clear all
 
-%{
+
+dt=round(1./vid.FrameRate,4);
 for i=1:length(seed_cell)
 RGB=[rand,rand,rand];
 vec=seed_cell{i,1};
@@ -252,7 +253,7 @@ for jjj=1:length(X)
 end
 hold off
 end 
-
+%}
 %clear all
 
 
@@ -265,6 +266,5 @@ ts=seed_cell{9,2};
  pause(0.5);
  end
 
- %}
  
 
