@@ -1,23 +1,25 @@
 %% ETV Project 
-% This script loads ETV images, performes cluster analysis of floating
-% particles, and evluates velocity of each particles
-% Min Jae Kim (mkim@bwh.harvard.edu)
-% Last Edited on: 02/05/2023
+% This script loads ETV/CPC video and performes cluster analysis of floating
+% particles and evaluates velocity of each particles in FOV.
+% Written by Min Jae Kim (mkim@bwh.harvard.edu), Dept. of Neurology,
+% Harvard Medical School
+% Last Edited on: 02/12/2023
 %% Overview 
 % Important Variables: 
-% (1) imstor: stores each image frames of loaded video
-% (2) cntrd_cell: stores cluster coordinates & centroid of clusters per frame
-% (3) ident_cell: stores cluster membership in each adjacent time-points
-% (4) seed_cell: stores each clusters across dif\ferent impoints
+% (1) imstor: stores each video frames of loaded ETV/CPC vieo
+% (2) cntrd_cell: stores cluster coordinates & centroid of clusters identified in each frame
+% (3) ident_cell: stores cluster membership of frames between temporally
+% adjacent time poiints
+% (4) seed_cell: stores each clusters across different timepoints
 %% Variable Set 
-vid_tit='2f879_iiiPre.mp4'; % 
-filt_Y=1; % Apply gaussan filter
-gaus_filt=2; % Degree of filter (this smoothes frame image)
-thr_diff=0.85; % Threshold for diff image 
-clust_size=100; % Minimum Cluster Membership
-auto_lag_thr=4.7; %Maximum distance between temporal points (%) of entire pixel dimention
-auto_corr=0.5; %Minimum correlation coefficient between clusters between temporal points
-pix2mm=0.0432; %0.0432 mm/pix (BE CAREFUL WITH THIS! DEPENDS ON RESOLUTION OF VIDEO)
+vid_tit='sample_vid.mp4'; %title of video
+filt_Y=1; % Apply gaussian filter (Yes/No) | Default = Yes
+gaus_filt=2; % Degree of gaussian filter applied | Default = 2
+thr_diff=0.85; % Image intensity threshold for cluster detection | Default =  0.85
+clust_size=100; % Minimum number of pixels in cluster | Default = 100 
+auto_lag_thr=4.7; % Maximum distance between clusters across two adjacent timepoints | Default 
+auto_corr=0.5;  % Minimum spatial correlation coefficient across two adjacent timepoints
+pix2mm=0.0432; % Pixel-mm Convertion Factor (units = mm/pix) |(BE CAREFUL WITH THIS! DEPENDS ON RESOLUTION OF VIDEO)
 %% Step 0: Loading Video
 disp("Step 1: Loading Video Frames")
 vid=VideoReader(vid_tit); %Load Video file

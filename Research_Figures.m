@@ -1,4 +1,5 @@
-%% Raw Video (2 Slides)
+%% ETV Figure Generator
+
 t=round(1./vid.FrameRate,3);
 cnt=0;
 for i=104:112
