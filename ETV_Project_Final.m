@@ -10,7 +10,7 @@
 % (3) ident_cell: stores cluster membership in each adjacent time-points
 % (4) seed_cell: stores each clusters across dif\ferent impoints
 %% Variable Set 
-vid_tit='f5150_latPre.mp4'; % 
+vid_tit='2f879_iiiPre.mp4'; % 
 filt_Y=1; % Apply gaussan filter
 gaus_filt=2; % Degree of filter (this smoothes frame image)
 thr_diff=0.85; % Threshold for diff image 
